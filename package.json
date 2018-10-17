@@ -1,0 +1,34 @@
+{
+  "name": "windlass-core",
+  "version": "0.0.1",
+  "description": "A Javascript framework for easily integrating blockchain applications written with the Truffle Framework into front-end Javascript user-interfaces",
+  "main": "dist/windlass-core.js",
+  "scripts": {
+    "build": "babel src --presets babel-preset-es2017 --out-dir dist",
+    "prepublish": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pmumby/windlass-core.git"
+  },
+  "keywords": [
+    "blockchain",
+    "framework",
+    "data",
+    "ethereum"
+  ],
+  "author": "Paul Mumby",
+  "license": "LGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/pmumby/windlass-core/issues"
+  },
+  "homepage": "https://github.com/pmumby/windlass-core#readme",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-es2017": "^6.24.1"
+  },
+  "dependencies": {
+    "json-loader": "^0.5.7",
+    "truffle-contract": "^3.0.6"
+  }
+}

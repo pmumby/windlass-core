@@ -1,0 +1,25 @@
+{
+    "systemName":"Windlass",
+    "chain":{
+        "fallbackProvider":"http://localhost:8545",
+        "pollingInterval":1000
+    },
+    "logPriorities":{
+        "ALL":-1000000,
+        "DEBUG":10000,
+        "ERROR":40000,
+        "FATAL":50000,
+        "INFO":20000,
+        "OFF":1000000,
+        "WARN":30000
+    },
+    "logLevel":"INFO",
+    "logToConsole":true,
+    "callbacks":{
+        "update":null,
+        "log":null,
+        "accountChange":null
+    },
+    "contracts":[],
+    "models":[]
+}
