@@ -1,0 +1,94 @@
+{
+    "name": "Person",
+    "contract": "PersonCore",
+    "attributes": [
+        {
+            "name": "id",
+            "type": "index",
+            "friendlyName": "ID",
+            "description": "Person's ID#"
+        },
+        {
+            "name": "name",
+            "type": "string",
+            "friendlyName": "Name",
+            "description": "Person's Name",
+            "getter": "getName",
+            "setter": "setName"
+        },
+        {
+            "name": "owner",
+            "type": "address",
+            "friendlyName": "Owner",
+            "description": "Address which owns the Person",
+            "getter": "getOwner",
+            "setter": "transferOwnership"
+        },
+        {
+            "name": "state",
+            "type": "number",
+            "friendlyName": "State",
+            "description": "The 'state' of the Person",
+            "getter": "getState",
+            "setter": "setState"
+        },
+        {
+            "name": "likes",
+            "type": "number",
+            "friendlyName": "Likes",
+            "description": "Number of Likes the Person has received",
+            "getter": "getLikes"
+        },
+        {
+            "name": "likerCount",
+            "type": "number",
+            "friendlyName": "Liker Count",
+            "description": "Number of other addresses that have 'liked' this Person",
+            "getter": "getLikerCount"
+        }
+    ],
+    "constructor": {
+        "method": "newPerson",
+        "friendlyName": "New Person",
+        "description": "Create a new person instance",
+        "params": [
+            "name"
+        ]
+    },
+    "events": [
+        {
+            "name": "NewPerson",
+            "contract": "PersonCore",
+            "indexField": "id",
+            "indicatesCreation": true,
+            "indicatesUpdate": false
+        },
+        {
+            "name": "PersonCore.PersonUpdate",
+            "contract": "PersonCore",
+            "indexField": "id",
+            "indicatesCreation": false,
+            "indicatesUpdate": true
+        },
+        {
+            "name": "PersonCore.NewLike",
+            "contract": "PersonCore",
+            "indexField": "id",
+            "indicatesCreation": false,
+            "indicatesUpdate": true
+        }
+    ],
+    "enumerator": {
+        "method": "getPersonCount",
+        "extraParams": []
+    },
+    "actions": [
+        {
+            "name": "like",
+            "friendlyName": "Like",
+            "description": "Like this person",
+            "method": "like",
+            "extraParams": []
+        }
+    ]
+}
