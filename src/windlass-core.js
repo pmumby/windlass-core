@@ -10,6 +10,8 @@ class Windlass {
         this.chain = new Chain(this.config.chain, this.logger)
         this.models = {}
         this.dataCache = {}
+        this.log = this.log.bind(this)
+        this.logContract = this.logContract.bind(this)
     }
 
     log(message, priority = "INFO", timeout = 3000) {
@@ -35,7 +37,8 @@ class Windlass {
             this.log("...Initializing Model: " + modelData.name)
             this.dataCache[modelData.name] = new Map()
             let newModel = Object.assign(
-                this.buildObjectMethods(modelData)
+                this.buildObjectMethods(modelData),
+                {config:modelData}
                 //TODO: Possibly other objects to compose for model
             )
             this.models[modelData.name] = newModel
@@ -50,7 +53,7 @@ class Windlass {
     }
 
     async fetchObjectData(modelName, indexValue) {
-        let modelData = this.models[modelName]
+        let modelData = this.models[modelName].config
         let modelContract = modelData.contract
         let core = this.chain.contractInstances[modelContract]
         let obj = new Map()
@@ -71,7 +74,7 @@ class Windlass {
     }
 
     watchObject(modelName, indexValue) {
-        let modelData = this.models[modelName]
+        let modelData = this.models[modelName].config
         let hooks = [];
         for (const event of modelData.events) {
             if (event.indicatesUpdate) {
@@ -86,19 +89,21 @@ class Windlass {
     }
 
     async updateObject(modelName, indexValue) {
-        let modelData = this.models[modelName]
+        let modelData = this.models[modelName].config
         this.dataCache[modelData.name].set(indexValue, await this.fetchObjectData(modelName, indexValue))
         this.dataUpdated()
     }
 
     async enumerateObjects(modelName) {
-        let modelData = this.models[modelName]
+        let modelData = this.models[modelName].config
+        this.logContract(modelData.name,"Enumerating Objects...")
         let modelContract = modelData.contract
         let core = this.chain.contractInstances[modelContract]
         let objCount = await core[modelData.enumerator.method].call.apply(this, modelData.enumerator.extraParams)
         for (let i = 0; i < objCount; i++) {
             this.watchObject(modelName, i);
         }
+        this.logContract(modelData.name,"Enumeration Complete!")
     }
 
     setupNewObjectHooks(modelData) {
@@ -120,7 +125,7 @@ class Windlass {
         //Generate Setter Function Wrappers
         for (const attribute of modelData.attributes) {
             if (attribute.hasOwnProperty("setter")) {
-                let f = async (index, value) => {
+                let fSetter = async function(index, value) {
                     let funcString = "Update to " + modelData.name + " ID:" + index + " " + attribute.friendlyName + " To Value: [" + value + "]"
                     let logStringReq = "Requesting " + funcString + "..."
                     let logStringSuccess = funcString + " was Successful!"
@@ -132,12 +137,12 @@ class Windlass {
                     this.chain.watchTX(txResult, txCallback)
                     return txResult
                 }
-                methods[action.name] = f
+                methods[attribute.setter] = fSetter.bind(this)
             }
         }
         //Generate Action Function Wrappers
         for (const action of modelData.actions) {
-            let f = async (index) => {
+            let fAction = async function(index) {
                 //TODO: Handle extra params!
                 let funcString = action.friendlyName+" on "+modelData.name+" ID:"+index
                 let logStringReq = "Requesting " + funcString + "..."
@@ -150,10 +155,10 @@ class Windlass {
                 this.chain.watchTX(txResult, txCallback)
                 return txResult
             }
-            methods[action.name] = f
+            methods[action.name] = fAction.bind(this)
         }
         //Generate Constructor Function Wrapper
-        let f = async () => {
+        let fConstructor = async function (...args) {
             let funcString = modelData.constructor.friendlyName
             let logStringReq = "Requesting " + funcString + "..."
             let logStringSuccess = funcString + " was Successful!"
@@ -161,12 +166,14 @@ class Windlass {
             let txCallback = (txData, txLogs) => {
                 this.logContract(modelContract, logStringSuccess)
             }
-            let paramArray = arguments.concat([{ from: this.chain.getAccount() }])
+            let paramArray = args.concat([{ from: this.chain.getAccount() }])
+            //let paramArray = Array.prototype.concat.call(arguments,[{ from: this.chain.getAccount() }])
+            console.log(paramArray)
             let txResult = await core[modelData.constructor.method].apply(this,paramArray)
             this.chain.watchTX(txResult, txCallback)
             return txResult
         }
-        methods.new = f
+        methods.new = fConstructor.bind(this)
         return methods
     }
 

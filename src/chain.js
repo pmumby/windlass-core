@@ -3,7 +3,7 @@ const TruffleContract = require("truffle-contract")
 
 class Chain {
     constructor(configObject,logger) {
-        this.config = Object.assign(defaultConfig, configObject)
+        this.config = Object.assign(configObject)
         this.logger = logger
         this.web3Provider = null
         this.ready = false
@@ -15,6 +15,7 @@ class Chain {
         this.contracts = {}
         this.contractInstances = {}
         this.suspendMessages = false;
+        this.log = this.log.bind(this)
     }
 
     log(message, priority = "INFO", timeout = 3000) {
@@ -22,12 +23,12 @@ class Chain {
     }
 
     async init() {
-        this.logSystem("Blockchain Initialization Complete!")
+        this.log("Initializing Blockchain Connection...")
         await this.initWeb3()
         await this.initContracts()
         this.poll()
         this.ready = true
-        this.logSystem("Blockchain Initialization Complete!")
+        this.log("Blockchain Initialization Complete!")
     }
 
     async poll() {
@@ -43,7 +44,7 @@ class Chain {
                 });
             }
         });
-        window.setTimeout(this.poll.bind(this), this.config.chain.pollingInterval);
+        window.setTimeout(this.poll.bind(this), this.config.pollingInterval);
     }
 
     async newBlock(blockData) {
@@ -212,7 +213,7 @@ class Chain {
             this.log("Legacy Web3 Browser Injection Detected! See Documentation for EIP1102 For assistance improving your privacy!", "WARN");
         } else {
             // If no injected web3 instance is detected, fallback to the TestRPC
-            this.web3Provider = new Web3.providers.HttpProvider(this.config.chain.fallbackProvider);
+            this.web3Provider = new Web3.providers.HttpProvider(this.config.fallbackProvider);
             this.log("No injection Detected! Falling back to direct RPC Provider!", "WARN");
         }
         this.web3 = new Web3(this.web3Provider);

@@ -3,7 +3,8 @@
     "chain": {
         "fallbackProvider": "http://localhost:8545",
         "pollingInterval": 1000,
-        "accountChangeCallback":null
+        "accountChangeCallback":null,
+        "contracts": []
     },
     "logger": {
         "logPriorities": {
@@ -20,6 +21,5 @@
         "callback": null
     },
     "updateCallback":null,
-    "contracts": [],
     "models": []
 }

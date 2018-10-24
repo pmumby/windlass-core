@@ -1,7 +1,8 @@
 class Logger {
     constructor(configObject) {
-        this.config = Object.assign(defaultConfig, configObject)
+        this.config = Object.assign(configObject)
         this.logEvents = []
+        this.log = this.log.bind(this)
     }
 
     init() {
