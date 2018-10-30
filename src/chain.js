@@ -16,23 +16,27 @@ class Chain {
         this.contractInstances = {}
         this.suspendMessages = false;
         this.log = this.log.bind(this)
+        this.logSilent = this.logSilent.bind(this)
     }
 
     log(message, priority = "INFO", timeout = 3000) {
         this.logger.log("Blockchain", message, priority, timeout)
     }
 
+    logSilent(message, priority = "INFO") {
+        this.log(message,priority,0)
+    }
+
     async init() {
-        this.log("Initializing Blockchain Connection...")
+        this.logSilent("Initializing Blockchain Connection...")
         await this.initWeb3()
         await this.initContracts()
         this.poll()
         this.ready = true
-        this.log("Blockchain Initialization Complete!")
+        this.logSilent("Blockchain Initialization Complete!")
     }
 
     async poll() {
-        this.log("Beginning Poll", "DEBUG");
         //Check for account changes:
         this.getAccount()
         //Check for new block:
@@ -49,7 +53,7 @@ class Chain {
 
     async newBlock(blockData) {
         var blockNumber = blockData.number;
-        this.log("New Block Detected:" + blockNumber, "DEBUG")
+        this.logSilent("New Block Detected:" + blockNumber, "DEBUG")
         this.checkWatchedObjects(blockNumber);
         for (const tx of blockData.transactions) {
             await this.checkTX(tx);
@@ -92,14 +96,14 @@ class Chain {
         for (const idx in blockEvents) {
             if (blockEvents.hasOwnProperty(idx)) {
                 let event = blockEvents[idx];
-                this.log("Checking Hook: [" + hookString + "]", "DEBUG")
+                this.logSilent("Checking Hook: [" + hookString + "]", "DEBUG")
                 if (!hookString.includes(":") && event.FQN === hookString) {
                     return true;
                 }
                 if (hookString.includes(":")) {
                     let [hook_fqn, hook_id_field] = hookString.split(":")
                     if (hook_fqn === event.FQN) {
-                        this.log("Event FQN Matches", "DEBUG")
+                        this.logSilent("Event FQN Matches", "DEBUG")
                         let id_val = event.args.hasOwnProperty(hook_id_field) ? +event.args[hook_id_field].valueOf() : null
                         if (id === "*") {
                             if (callback instanceof Function) {
@@ -120,20 +124,20 @@ class Chain {
         var idVal = objectID === "*" ? objectID : +objectID
         var watch = { id: idVal, hooks: eventHooks, callback: callback, delete: deleteCallback };
         this.watchedObjects.push(watch);
-        this.log("Adding Watch:" + watch, "DEBUG")
+        this.logSilent("Adding Watch:" + watch, "DEBUG")
     }
 
     stopWatch(objectID) {
         for (const watch in this.watchedObjects) {
             if (watch.id === objectID) {
-                this.log("Deleting Watch:" + watch, "DEBUG")
+                this.logSilent("Deleting Watch:" + watch, "DEBUG")
                 //TODO: Delete and call deletion callback
             }
         }
     }
 
     watchTX(txData, callback) {
-        this.log("TX: " + txData.tx + " Pending...", "INFO", 0)
+        this.logSilent("TX: " + txData.tx + " Pending...", "INFO")
         this.pendingTX[txData.tx] = callback;
     }
 
@@ -152,14 +156,14 @@ class Chain {
         var txLogs = await this.fetchTXLogs(txData);
         //Trigger callback if relevant
         if (txHash in this.pendingTX) {
-            this.log("Pending TX:" + txHash + " Completed!", "INFO", 0);
+            this.logSilent("Pending TX:" + txHash + " Completed!", "INFO");
             this.pendingTX[txHash](txData, txLogs);
             delete this.pendingTX[txHash];
         }
     }
 
     async fetchBlockLogs(blockNumber) {
-        this.log("Reading Block Event Logs for Block #" + blockNumber, "DEBUG")
+        this.logSilent("Reading Block Event Logs for Block #" + blockNumber, "DEBUG")
         let contractInstanceEventsMapFunc = entry => {
             let contractName = entry[0]
             let contractInstance = entry[1]
@@ -194,19 +198,19 @@ class Chain {
     async fetchTXLogs(txData) {
         var blockNumber = txData.blockNumber;
         var txHash = txData.transactionHash;
-        this.log("Fetching Transaction Logs for TX:" + txHash, "DEBUG")
+        this.logSilent("Fetching Transaction Logs for TX:" + txHash, "DEBUG")
         const blockEventLogs = await this.fetchBlockLogs(blockNumber);
         var txEventLogs = blockEventLogs.filter(event => event.transactionHash === txHash)
         return txEventLogs;
     }
 
     async initWeb3() {
-        this.log("Initializing Web3...");
+        this.logSilent("Initializing Web3...");
         if (typeof window.ethereum !== 'undefined') {
             // Is the new EIP1102 window.ethereum injected provider present?
             this.web3Provider = ethereum
             await ethereum.enable();
-            this.log("Privacy Enabled Ethereum Browser Detected", "INFO");
+            this.logSilent("Privacy Enabled Ethereum Browser Detected", "INFO");
         } else if (typeof window.web3 !== 'undefined') {
             // Is there is an injected web3 instance?
             this.web3Provider = window.web3.currentProvider;
@@ -252,10 +256,10 @@ class Chain {
     }
 
     async initContracts() {
-        this.log("Initializing Smart Contract Instances...");
-        this.log(this.config.contracts.length + " Contracts Found...");
+        this.logSilent("Initializing Smart Contract Instances...");
+        this.logSilent(this.config.contracts.length + " Contracts Found...");
         for (const contractData of this.config.contracts) {
-            this.log("...Initializing Contract: " + contractData.contractName);
+            this.logSilent("...Initializing Contract: " + contractData.contractName);
             this.contracts[contractData.contractName] = TruffleContract(contractData);
             this.contracts[contractData.contractName].setProvider(this.web3Provider);
             this.contractInstances[contractData.contractName] = await this.contracts[contractData.contractName].deployed();
