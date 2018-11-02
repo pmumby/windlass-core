@@ -22,5 +22,5 @@
         "callback": null
     },
     "updateCallback":null,
-    "models": []
+    "datamodel": {}
 }

@@ -1,94 +1,96 @@
 {
-    "name": "Person",
-    "contract": "PersonCore",
-    "attributes": [
-        {
-            "name": "id",
-            "type": "index",
-            "friendlyName": "ID",
-            "description": "Person's ID#"
+    "Person": {
+        "primaryContract": "PersonCore",
+        "primaryKey": "id",
+        "properties": {
+            "id": {
+                "title": "ID",
+                "type": "integer",
+                "format": "uint256",
+                "description": "Person's ID#"
+            },
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "description": "Person's Name",
+                "required": true,
+                "getter": "getName",
+                "setter": "setName"
+            },
+            "owner": {
+                "title": "Owner",
+                "type": "address",
+                "description": "Address which owns the Person",
+                "getter": "getOwner",
+                "setter": "transferOwnership"
+            },
+            "state": {
+                "tile": "State",
+                "type": "integer",
+                "enum": {
+                    "None": 0,
+                    "Red": 1,
+                    "Green": 2,
+                    "Blue": 3,
+                    "Purple": 4
+                },
+                "description": "The 'state' of the Person",
+                "getter": "getState",
+                "setter": "setState"
+            },
+            "likes": {
+                "title": "Likes",
+                "type": "integer",
+                "format": "uint256",
+                "description": "Number of Likes the Person has received",
+                "getter": "getLikes"
+            },
+            "likerCount": {
+                "title": "Liker Count",
+                "type": "integer",
+                "format": "uint256",
+                "description": "Number of other addresses that have 'liked' this Person",
+                "getter": "getLikerCount"
+            }
         },
-        {
-            "name": "name",
-            "type": "string",
-            "friendlyName": "Name",
-            "description": "Person's Name",
-            "getter": "getName",
-            "setter": "setName"
+        "constructor": {
+            "method": "newPerson",
+            "title": "New Person",
+            "description": "Create a new person instance"
         },
-        {
-            "name": "owner",
-            "type": "address",
-            "friendlyName": "Owner",
-            "description": "Address which owns the Person",
-            "getter": "getOwner",
-            "setter": "transferOwnership"
+        "events": {
+            "PersonCore": {
+                "NewPerson": {
+                    "indexField": "id",
+                    "indicatesCreation": true,
+                    "indicatesUpdate": false
+                },
+                "PersonUpdate": {
+                    "indexField": "id",
+                    "indicatesCreation": false,
+                    "indicatesUpdate": true
+                },
+                "NewLike": {
+                    "indexField": "id",
+                    "indicatesCreation": false,
+                    "indicatesUpdate": true
+                }
+            }
         },
-        {
-            "name": "state",
-            "type": "number",
-            "friendlyName": "State",
-            "description": "The 'state' of the Person",
-            "getter": "getState",
-            "setter": "setState"
+        "enumerators": {
+            "getPersonCount": {
+                "method": "getPersonCount",
+                "parameters": {}
+            }
         },
-        {
-            "name": "likes",
-            "type": "number",
-            "friendlyName": "Likes",
-            "description": "Number of Likes the Person has received",
-            "getter": "getLikes"
-        },
-        {
-            "name": "likerCount",
-            "type": "number",
-            "friendlyName": "Liker Count",
-            "description": "Number of other addresses that have 'liked' this Person",
-            "getter": "getLikerCount"
+        "defaultEnumerator": "getPersonCount",
+        "actions": {
+            "like": {
+                "title": "Like",
+                "description": "Like this person",
+                "method": "like",
+                "parameters": {}
+            }
         }
-    ],
-    "constructor": {
-        "method": "newPerson",
-        "friendlyName": "New Person",
-        "description": "Create a new person instance",
-        "params": [
-            "name"
-        ]
-    },
-    "events": [
-        {
-            "name": "NewPerson",
-            "contract": "PersonCore",
-            "indexField": "id",
-            "indicatesCreation": true,
-            "indicatesUpdate": false
-        },
-        {
-            "name": "PersonCore.PersonUpdate",
-            "contract": "PersonCore",
-            "indexField": "id",
-            "indicatesCreation": false,
-            "indicatesUpdate": true
-        },
-        {
-            "name": "PersonCore.NewLike",
-            "contract": "PersonCore",
-            "indexField": "id",
-            "indicatesCreation": false,
-            "indicatesUpdate": true
-        }
-    ],
-    "enumerator": {
-        "method": "getPersonCount",
-        "extraParams": []
-    },
-    "actions": [
-        {
-            "name": "like",
-            "friendlyName": "Like",
-            "description": "Like this person",
-            "method": "like",
-            "extraParams": []
-        }
-    ]
+    }
 }
